@@ -1,10 +1,13 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 var cors = require('cors')
 const port = 5000
+require('dotenv').config();
 
 
 app.use(cors())
+app.use(bodyParser.json());
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.bdcpj22.mongodb.net/?retryWrites=true&w=majority`;
@@ -21,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
-        client.connect();
+        await client.connect();
         const userCollection = client
             .db("jobBox")
             .collection("userCollection");
@@ -32,21 +35,22 @@ async function run() {
 
         app.post('/user', async (req, res) => {
             const data = req.body;
-            const result = await userCollection.insertOne(data);
-            if (result) {
-                res.status(2001).send(true)
+            try {
+                const result = await userCollection.insertOne(data);
+                res.send(result);
+            } catch (error) {
+                res.status(500).send('Internal Server Error');
             }
-        })
+        });
 
         app.get('/user', async (req, res) => {
             const result = await userCollection.find({}).toArray();
             res.send(result)
-
         })
 
     } finally {
         // Ensures that the client will close when you finish/error
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);
