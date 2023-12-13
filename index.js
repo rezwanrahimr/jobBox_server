@@ -9,7 +9,7 @@ require('dotenv').config();
 app.use(cors())
 app.use(bodyParser.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.bdcpj22.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,6 +28,7 @@ async function run() {
         const userCollection = client
             .db("jobBox")
             .collection("userCollection");
+        const jobCollection = client.db("jobBox").collection("jobCollection");
 
         app.get('/', (req, res) => {
             res.send('Hello World!')
@@ -45,6 +46,36 @@ async function run() {
 
         app.get('/user', async (req, res) => {
             const result = await userCollection.find({}).toArray();
+            res.send(result)
+        })
+
+
+        app.post('/job', async (req, res) => {
+            const data = req.body;
+            console.log('check data', data);
+
+            try {
+                const result = await jobCollection.insertOne(data);
+                res.send(result);
+            } catch (error) {
+                
+                res.status(500).send('Internal Server Error: ' + error.toString());
+            }
+        });
+        app.get('/job/:id', async (req, res) => {
+            const id = req.params.id;
+
+            try {
+                const result = await jobCollection.findOne({ _id: new ObjectId(id) });
+                res.send(result);
+
+            } catch (error) {
+                
+                res.status(500).send('Internal Server Error: ' + error.toString());
+            }
+        })
+        app.get('/job', async (req, res) => {
+            const result = await jobCollection.find({}).toArray();
             res.send(result)
         })
 
