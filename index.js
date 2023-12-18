@@ -29,6 +29,7 @@ async function run() {
             .db("jobBox")
             .collection("userCollection");
         const jobCollection = client.db("jobBox").collection("jobCollection");
+        const queCollection = client.db("jobBox").collection("queCollection");
 
         app.get('/', (req, res) => {
             res.send('Hello World!')
@@ -151,6 +152,42 @@ async function run() {
             const result = await jobCollection.find().toArray();
             res.send(result);
         })
+
+        app.post('/question', async (req, res) => {
+            const data = req.body;
+
+            try {
+                const result = await queCollection.insertOne(data);
+                res.send(result);
+            } catch (error) {
+
+                res.status(500).send('Internal Server Error: ' + error.toString());
+            }
+        })
+
+        app.get('/question',async(req,res) =>{
+            const result = await queCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        // app.patch('/question', async (req, res) => {
+        //     try {
+        //         const data = req.body;
+        //         const { id } = data;
+        //         const update = { $set: { apply: [req.body] } };
+        //         const updatedJob = await jobCollection.findOneAndUpdate({ _id: new ObjectId(id) }, update, { new: true })
+
+        //         if (!updatedJob) {
+        //             return res.status(404).json({ message: 'Job not found' });
+        //         }
+
+        //         res.json(updatedJob);
+        //     } catch (error) {
+        //         console.error(error);
+        //         res.status(500).json({ message: 'Internal Server Error' });
+        //     }
+        // })
 
 
     } finally {
