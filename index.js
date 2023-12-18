@@ -82,10 +82,9 @@ async function run() {
         app.patch('/apply', async (req, res) => {
             try {
                 const data = req.body;
-                console.log("apply",data)
                 const { id } = data;
                 const update = { $set: { apply: [req.body] } };
-                const updatedJob = await jobCollection.findOneAndUpdate({_id:new ObjectId(id)}, update, { new: true })
+                const updatedJob = await jobCollection.findOneAndUpdate({ _id: new ObjectId(id) }, update, { new: true })
 
                 if (!updatedJob) {
                     return res.status(404).json({ message: 'Job not found' });
@@ -97,6 +96,62 @@ async function run() {
                 res.status(500).json({ message: 'Internal Server Error' });
             }
         })
+
+        // app.get('/apply', async (req, res) => {
+        //     try {
+        //         const userEmail = req.query.email;
+        //         if (!jobCollection || typeof jobCollection !== Object) {
+        //             return res.status(500).send({ error: "Internal Server Error" });
+        //         }
+
+        //         const jobArray =  Object.values(await jobCollection)
+
+        //         const findApply = await jobArray.filter(job => job.apply && Array.isArray(job.apply) && job.apply.some(applicant => applicant.email == userEmail));
+        //         console.log(findApply);
+
+        //         res.send(findApply);
+        //     } catch (error) {
+        //         console.log(error.message)
+        //     }
+        // })
+
+        // app.get('/apply', async (req, res) => {
+        //     try {
+        //         const userEmail = req.query.email;
+        //         console.log(userEmail)
+
+        //         // Check if jobCollection is defined and has properties
+        //         if (!jobCollection || typeof jobCollection !== 'object') {
+        //             console.log('jobCollection is undefined or not an object');
+        //             return res.status(500).json({ error: 'Internal Server Error' });
+        //         }
+
+        //         // Convert jobCollection values to an array
+        //         const jobArray = Object.values(await jobCollection);
+
+        //         // console.log('jobArray:', jobArray);
+
+        //         // Filter jobs where the user's email matches any "email" property in the "apply" array
+        //         const findApply = jobArray.filter(job => 
+        //             job.apply && Array.isArray(job.apply) && 
+        //             job.apply.some(applicant => applicant.email == userEmail)
+        //         );
+
+        //         console.log('findApply:', findApply);
+
+        //         res.json(findApply);
+        //     } catch (error) {
+        //         console.log('Error:', error.message);
+        //         res.status(500).json({ error: 'Internal Server Error' });
+        //     }
+        // });
+
+
+        app.get('/apply', async (req, res) => {
+            const result = await jobCollection.find().toArray();
+            res.send(result);
+        })
+
 
     } finally {
         // Ensures that the client will close when you finish/error
