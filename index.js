@@ -98,54 +98,6 @@ async function run() {
             }
         })
 
-        // app.get('/apply', async (req, res) => {
-        //     try {
-        //         const userEmail = req.query.email;
-        //         if (!jobCollection || typeof jobCollection !== Object) {
-        //             return res.status(500).send({ error: "Internal Server Error" });
-        //         }
-
-        //         const jobArray =  Object.values(await jobCollection)
-
-        //         const findApply = await jobArray.filter(job => job.apply && Array.isArray(job.apply) && job.apply.some(applicant => applicant.email == userEmail));
-        //         console.log(findApply);
-
-        //         res.send(findApply);
-        //     } catch (error) {
-        //         console.log(error.message)
-        //     }
-        // })
-
-        // app.get('/apply', async (req, res) => {
-        //     try {
-        //         const userEmail = req.query.email;
-        //         console.log(userEmail)
-
-        //         // Check if jobCollection is defined and has properties
-        //         if (!jobCollection || typeof jobCollection !== 'object') {
-        //             console.log('jobCollection is undefined or not an object');
-        //             return res.status(500).json({ error: 'Internal Server Error' });
-        //         }
-
-        //         // Convert jobCollection values to an array
-        //         const jobArray = Object.values(await jobCollection);
-
-        //         // console.log('jobArray:', jobArray);
-
-        //         // Filter jobs where the user's email matches any "email" property in the "apply" array
-        //         const findApply = jobArray.filter(job => 
-        //             job.apply && Array.isArray(job.apply) && 
-        //             job.apply.some(applicant => applicant.email == userEmail)
-        //         );
-
-        //         console.log('findApply:', findApply);
-
-        //         res.json(findApply);
-        //     } catch (error) {
-        //         console.log('Error:', error.message);
-        //         res.status(500).json({ error: 'Internal Server Error' });
-        //     }
-        // });
 
 
         app.get('/apply', async (req, res) => {
@@ -165,29 +117,30 @@ async function run() {
             }
         })
 
-        app.get('/question',async(req,res) =>{
+        app.get('/question', async (req, res) => {
             const result = await queCollection.find().toArray();
             res.send(result);
         })
 
+        app.patch('/replay', async (req, res) => {
+            try {
+                const data = req.body;
+                const { id } = data;
+                const update = { $push: { ans: data.text } };
+                const updateReplay = await queCollection.findOneAndUpdate({ _id: new ObjectId(id) }, update, { new: false })
 
-        // app.patch('/question', async (req, res) => {
-        //     try {
-        //         const data = req.body;
-        //         const { id } = data;
-        //         const update = { $set: { apply: [req.body] } };
-        //         const updatedJob = await jobCollection.findOneAndUpdate({ _id: new ObjectId(id) }, update, { new: true })
+                if (!updateReplay) {
+                    return res.status(404).json({ message: 'Job not found' });
+                }
 
-        //         if (!updatedJob) {
-        //             return res.status(404).json({ message: 'Job not found' });
-        //         }
+                res.json(updateReplay);
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal Server Error' });
+            }
+        })
 
-        //         res.json(updatedJob);
-        //     } catch (error) {
-        //         console.error(error);
-        //         res.status(500).json({ message: 'Internal Server Error' });
-        //     }
-        // })
+
 
 
     } finally {
